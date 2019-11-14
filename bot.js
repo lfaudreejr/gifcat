@@ -137,7 +137,9 @@ controller.webserver.get('/install/auth', async (req, res) => {
 });
 
 async function getTokenForTeam(teamId) {
+  console.log('getTokenForTeam teamId', teamId)
   const team = await storage.read([teamId]);
+  console.log('getTokenForTeam TEAM: ', team)
   if (team && team.bot_access_token) {
     return team.bot_access_token
   } else {
@@ -146,7 +148,9 @@ async function getTokenForTeam(teamId) {
 }
 
 async function getBotUserByTeam(teamId) {
+  console.log('getBotUserByTeam teamId', teamId)
   const team = await storage.read([teamId]);
+  console.log('getBotUserByTeam TEAM: ', team)
   if (team && team.bot_user_id) {
     return team.bot_user_id
   } else {
