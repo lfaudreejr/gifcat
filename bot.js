@@ -56,7 +56,7 @@ adapter.use(new SlackMessageTypeMiddleware());
 
 const controller = new Botkit({
     
-    webhook_uri: 'https://slackgifcat.herokuapp.com/api/messages',
+    webhook_uri: '/api/messages',
 
     adapter: adapter,
 
