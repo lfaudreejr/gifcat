@@ -142,6 +142,8 @@ async function getTokenForTeam(teamId) {
   console.log('getTokenForTeam TEAM: ', team)
   if (team && team.bot_access_token) {
     return team.bot_access_token
+  } else if (team && team[teamId] && team[teamId.bot_access_token]) {
+    return team[teamId].bot_access_token
   } else {
     console.error('Team not found in tokenCache: ', teamId);
   }
@@ -153,6 +155,8 @@ async function getBotUserByTeam(teamId) {
   console.log('getBotUserByTeam TEAM: ', team)
   if (team && team.bot_user_id) {
     return team.bot_user_id
+  } else if (team && team[teamId] && team[teamId.bot_user_id]) {
+    return team[teamId].bot_user_id
   } else {
     console.error('Team not found in userCache: ', teamId);
   }
