@@ -17,4 +17,8 @@ module.exports = function(controller) {
         await bot.reply(message, `I heard a direct mention that said "${ message.text }"`);
     });
 
+    controller.hears('meow', 'direct_mention', async(bot, message) => {
+        await bot.reply(message, 'I heard meow!')
+    })
+
 }
