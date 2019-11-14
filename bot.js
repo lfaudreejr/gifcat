@@ -28,10 +28,11 @@ const {
 require('dotenv').config();
 
 let storage = null;
-storage = mongoStorage = new MongoDbStorage({
-  url: process.env.MONGO_URI,
-  database: process.env.MONGO_DB
-});
+if (process.env.MONGO_URI) {
+  storage = mongoStorage = new MongoDbStorage({
+    url: process.env.MONGO_URI,
+  });
+}
 
 
 
@@ -75,8 +76,8 @@ const controller = new Botkit({
 
 if (process.env.cms_uri) {
   controller.usePlugin(new BotkitCMSHelper({
-      uri: process.env.cms_uri,
-      token: process.env.cms_token,
+    uri: process.env.cms_uri,
+    token: process.env.cms_token,
   }));
 }
 
@@ -88,15 +89,15 @@ controller.ready(() => {
 
   /* catch-all that uses the CMS to trigger dialogs */
   if (controller.plugins.cms) {
-      controller.on('message,direct_message', async (bot, message) => {
-          let results = false;
-          results = await controller.plugins.cms.testTrigger(bot, message);
+    controller.on('message,direct_message', async (bot, message) => {
+      let results = false;
+      results = await controller.plugins.cms.testTrigger(bot, message);
 
-          if (results !== false) {
-              // do not continue middleware!
-              return false;
-          }
-      });
+      if (results !== false) {
+        // do not continue middleware!
+        return false;
+      }
+    });
   }
 
 });
@@ -121,30 +122,23 @@ controller.webserver.get('/install', (req, res) => {
 
 controller.webserver.get('/install/auth', async (req, res) => {
   try {
-      const results = await controller.adapter.validateOauthCode(req.query.code);
+    const results = await controller.adapter.validateOauthCode(req.query.code);
 
-      console.log('FULL OAUTH DETAILS', results);
+    console.log('FULL OAUTH DETAILS', results);
 
-      // Store token by team in bot state.
-      tokenCache[results.team_id] = results.bot.bot_access_token;
+    storage.write({
+      [results.team_id]: {
+        bot_access_token: results.bot.bot_access_token,
+        bot_user_id: results.bot.bot_user_id,
+      },
+    })
 
-      // Capture team to bot id
-      userCache[results.team_id] = results.bot.bot_user_id;
-
-      storage.write({
-          [results.team_id]: {
-              bot_access_token: results.bot.bot_access_token,
-              bot_user_id: results.bot.bot_user_id,
-          },
-      })
-
-
-      res.json('Success! Bot installed.');
+    res.json('Success! Bot installed.');
 
   } catch (err) {
-      console.error('OAUTH ERROR:', err);
-      res.status(401);
-      res.send(err.message);
+    console.error('OAUTH ERROR:', err);
+    res.status(401);
+    res.send(err.message);
   }
 });
 
@@ -159,34 +153,18 @@ if (process.env.USERS) {
   userCache = JSON.parse(process.env.USERS);
 }
 
-async function getTokenForTeam(teamId) {
-  if (tokenCache[teamId]) {
-      return new Promise((resolve) => {
-          setTimeout(function () {
-              resolve(tokenCache[teamId]);
-          }, 150);
-      });
-  }
-  const team = await storage.read([teamId]);
-  if (team && team.bot_access_token) {
-      return team.bot_access_token
-  } else {
-      console.error('Team not found in tokenCache: ', teamId);
-  }
-}
-
 async function getBotUserByTeam(teamId) {
   if (userCache[teamId]) {
-      return new Promise((resolve) => {
-          setTimeout(function () {
-              resolve(userCache[teamId]);
-          }, 150);
-      });
+    return new Promise((resolve) => {
+      setTimeout(function () {
+        resolve(userCache[teamId]);
+      }, 150);
+    });
   }
   const team = await storage.read([teamId]);
   if (team && team.bot_user_id) {
-      return team.bot_user_id
+    return team.bot_user_id
   } else {
-      console.error('Team not found in userCache: ', teamId);
+    console.error('Team not found in userCache: ', teamId);
   }
 }
