@@ -12,6 +12,7 @@ module.exports = function (controller) {
   let CATS = [];
 
   controller.on('direct_mention', async (bot, message) => {
+    console.log('a direct mention has been heard - ', message.text)
     if (message.text === 'meow') {
       console.log('Got start - meow!!')
       // LISTENERS[bot.user] = await setIntervalAsync(getCats, 5000, message);
