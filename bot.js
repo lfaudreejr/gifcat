@@ -31,6 +31,7 @@ let storage = null;
 if (process.env.MONGO_URI) {
   storage = mongoStorage = new MongoDbStorage({
     url: process.env.MONGO_URI,
+    database: 'gifcat'
   });
 }
 
@@ -102,18 +103,11 @@ controller.ready(() => {
 
 });
 
-
-
 controller.webserver.get('/', (req, res) => {
 
   res.send(`This app is running Botkit ${ controller.version }.`);
 
 });
-
-
-
-
-
 
 controller.webserver.get('/install', (req, res) => {
   // getInstallLink points to slack's oauth endpoint and includes clientId and scopes
@@ -142,25 +136,16 @@ controller.webserver.get('/install/auth', async (req, res) => {
   }
 });
 
-let tokenCache = {};
-let userCache = {};
-
-if (process.env.TOKENS) {
-  tokenCache = JSON.parse(process.env.TOKENS);
-}
-
-if (process.env.USERS) {
-  userCache = JSON.parse(process.env.USERS);
+async function getTokenForTeam(teamId) {
+  const team = await storage.read([teamId]);
+  if (team && team.bot_access_token) {
+    return team.bot_access_token
+  } else {
+    console.error('Team not found in tokenCache: ', teamId);
+  }
 }
 
 async function getBotUserByTeam(teamId) {
-  if (userCache[teamId]) {
-    return new Promise((resolve) => {
-      setTimeout(function () {
-        resolve(userCache[teamId]);
-      }, 150);
-    });
-  }
   const team = await storage.read([teamId]);
   if (team && team.bot_user_id) {
     return team.bot_user_id
