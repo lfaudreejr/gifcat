@@ -13,6 +13,8 @@ module.exports = function (controller) {
 
   controller.on('direct_mention', async (bot, message) => {
     console.log('a direct mention has been heard - ', message.text)
+    console.log('bot is - ', bot)
+    console.log('message is - ', message)
     if (message.text === 'meow') {
       console.log('Got start - meow!!')
       // LISTENERS[bot.user] = await setIntervalAsync(getCats, 5000, message);
@@ -22,8 +24,10 @@ module.exports = function (controller) {
     }
     if (message.text === 'stop') {
       // clearIntervalAsync(LISTENERS[bot.user]);
-      clearIntervalAsync(LISTENER)
-      LISTENER = undefined
+      // clearIntervalAsync(LISTENER)
+      // LISTENER = undefined
+      clearIntervalAsync(LISTENERS[message.channel])
+      LISTENERS[message.channel] = undefined
       await bot.say('Stopped.')
     }
     if (message.text.includes('set interval')) {
@@ -31,7 +35,10 @@ module.exports = function (controller) {
       
       if (incoming[0] === 'set' && incoming[1] === 'interval' && !isNaN(Number(incoming[2]))) {
         TIME = Number(incoming[2])
-        if (LISTENER) {
+        // if (LISTENER) {
+        //   await setListener(message)
+        // }
+        if (LISTENERS[message.channel]) {
           await setListener(message)
         }
         await bot.say('Your new interval has been set to ' + TIME + ' minutes.')
@@ -46,11 +53,16 @@ module.exports = function (controller) {
   });
   
   async function setListener (message) {
-    if (LISTENER) {
-      clearIntervalAsync(LISTENER)
-      LISTENER = undefined
+    if (LISTENERS[message.channel]) {
+      clearIntervalAsync(LISTENERS[message.channel])
+      LISTENERS[message.channel] = undefined
     }
-    LISTENER = await setIntervalAsync(getCats, 60000 * TIME, message);
+    LISTENERS[message.channel] = await setIntervalAsync(getCats, 60000 * TIME, message);
+    // if (LISTENER) {
+    //   clearIntervalAsync(LISTENER)
+    //   LISTENER = undefined
+    // }
+    // LISTENER = await setIntervalAsync(getCats, 60000 * TIME, message);
   }
 
   async function getCats(message) {
