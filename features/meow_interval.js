@@ -7,8 +7,7 @@ const {
 module.exports = function (controller) {
 
   let LISTENERS = {};
-  let LISTENER;
-  let TIME = 1;
+  let TIME = 15;
   let CATS = [];
 
   controller.on('direct_mention', async (bot, message) => {
@@ -17,15 +16,10 @@ module.exports = function (controller) {
     console.log('message is - ', message)
     if (message.text === 'meow') {
       console.log('Got start - meow!!')
-      // LISTENERS[bot.user] = await setIntervalAsync(getCats, 5000, message);
       await getCats(message);
       await setListener(message)
-      // LISTENER = await setIntervalAsync(getCats, 5000, message);
     }
     if (message.text === 'stop') {
-      // clearIntervalAsync(LISTENERS[bot.user]);
-      // clearIntervalAsync(LISTENER)
-      // LISTENER = undefined
       clearIntervalAsync(LISTENERS[message.channel])
       LISTENERS[message.channel] = undefined
       await bot.say('Stopped.')
@@ -35,9 +29,6 @@ module.exports = function (controller) {
       
       if (incoming[0] === 'set' && incoming[1] === 'interval' && !isNaN(Number(incoming[2]))) {
         TIME = Number(incoming[2])
-        // if (LISTENER) {
-        //   await setListener(message)
-        // }
         if (LISTENERS[message.channel]) {
           await setListener(message)
         }
@@ -58,47 +49,41 @@ module.exports = function (controller) {
       LISTENERS[message.channel] = undefined
     }
     LISTENERS[message.channel] = await setIntervalAsync(getCats, 60000 * TIME, message);
-    // if (LISTENER) {
-    //   clearIntervalAsync(LISTENER)
-    //   LISTENER = undefined
-    // }
-    // LISTENER = await setIntervalAsync(getCats, 60000 * TIME, message);
   }
 
   async function getCats(message) {
     const bot = await controller.spawn({
-      // incoming_webhook: {
-      //   url: 'https://hooks.slack.com/services/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'
-      // },
       activity: {
         conversation: {
           team: message.team,
         },
      },
     })
-    // bot.changeContext(message.reference)
+
     await bot.startConversationInChannel(message.channel, message.user);
 
     try {
       if (CATS.length === 0) {
-        const { data } = await axios.get(`https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_KEY}&q=cat&rating=G&lang=en`);
-        CATS = data.data;
+        // const { data } = await axios.get(`https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_KEY}&q=cat&rating=G&lang=en`);
+        // CATS = data.data;
+        const { data } = await axios.get(`https://api.giphy.com/v1/gifs/random?api_key=${process.env.GIPHY_KEY}&tag=cat&rating=G&lang=en`)
+        // TODO:
+        // store offset
+        // limit is 25 per pull
+        // subtract 25 from length total to get # offsets
+        // use random number 0 - offset total for offset when getting more gifs
+        // OR use giphy random endpoint on each call
       }
   
-      const gif = CATS.pop();
-  
-      // await bot.say({
-      //   text: `https://media.giphy.com/media/${gif.id}/giphy.gif`,
-      //   channel: message.channel
-      // });
+      // const gif = CATS.pop();
+      const { gif: data } = data
+
+      console.log('got cat gif: ', gif)
+
       await bot.say(`https://media.giphy.com/media/${gif.id}/giphy.gif`)
 
     } catch (error) {
       console.error('[ERROR] ', error);
-      // await bot.say({
-      //   text: 'Sorry, I am not working well right now.',
-      //   channel: message.channel
-      // });
       await bot.say('Sorry, I am not working well right now.')
     }
   }

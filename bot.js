@@ -161,3 +161,13 @@ async function getBotUserByTeam(teamId) {
     console.error('Team not found in userCache: ', teamId);
   }
 }
+
+
+// TODO: 
+/*
+CATS array is shared currently - fix it
+Save intervals to user - channel
+On set interval save interval to user - channel
+Get intervals and set them into memory on server start
+
+*/
