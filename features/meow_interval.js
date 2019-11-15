@@ -66,7 +66,6 @@ module.exports = function (controller) {
       if (CATS.length === 0) {
         // const { data } = await axios.get(`https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_KEY}&q=cat&rating=G&lang=en`);
         // CATS = data.data;
-        const { data } = await axios.get(`https://api.giphy.com/v1/gifs/random?api_key=${process.env.GIPHY_KEY}&tag=cat&rating=G&lang=en`)
         // TODO:
         // store offset
         // limit is 25 per pull
@@ -74,6 +73,7 @@ module.exports = function (controller) {
         // use random number 0 - offset total for offset when getting more gifs
         // OR use giphy random endpoint on each call
       }
+      const { data } = await axios.get(`https://api.giphy.com/v1/gifs/random?api_key=${process.env.GIPHY_KEY}&tag=cat&rating=G&lang=en`)
   
       // const gif = CATS.pop();
       const { gif: data } = data
