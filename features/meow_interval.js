@@ -76,7 +76,7 @@ module.exports = function (controller) {
       const { data } = await axios.get(`https://api.giphy.com/v1/gifs/random?api_key=${process.env.GIPHY_KEY}&tag=cat&rating=G&lang=en`)
   
       // const gif = CATS.pop();
-      const { gif: data } = data
+      const { data: gif } = data
 
       console.log('got cat gif: ', gif)
 
